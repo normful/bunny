@@ -769,6 +769,10 @@ module Bunny
         @transport.close
         self.close(false)
         @manually_closed = false
+
+        parent_process_group_id = Process.getpgid(Process.ppid)
+        @logger.error "Sending SIGKILL to parent process group ID #{parent_process_group_id}"
+        Process.kill("KILL", -parent_process_group_id)
       end
     end
 

@@ -57,8 +57,14 @@ if ::Toxiproxy.running?
         @connection.start
       end
 
-      it "permanently closes connection" do
+      it "permanently closes connection and sends SIGKILL to parent process group ID" do
         expect(@connection.open?).to be(true)
+
+        allow(Process).to receive(:kill).exactly(1).times
+
+        parent_pgid = 123
+        allow(Process).to receive(:getpgid).and_return(parent_pgid)
+        expect(Process).to receive(:kill).with("KILL", -parent_pgid)
 
         rabbitmq_toxiproxy.down do
           sleep 5
